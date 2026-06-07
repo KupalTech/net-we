@@ -1,0 +1,50 @@
+.register-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.register-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.register-title {
+  color: #333;
+  font-weight: 700;
+}
+
+.verticals-container {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  background: #f8f9fa;
+}
+
+.vertical-option {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.vertical-option:hover {
+  transform: scale(1.05);
+}
+
+.vertical-badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .register-card {
+    padding: 1.5rem;
+  }
+  
+  .verticals-container {
+    max-height: 150px;
+  }
+}

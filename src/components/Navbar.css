@@ -1,0 +1,35 @@
+.navbar-custom {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0.75rem 0;
+}
+
+.navbar-brand-custom {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #667eea !important;
+}
+
+.user-dropdown-toggle {
+  text-decoration: none;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.user-dropdown-toggle::after {
+  display: none;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #667eea;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.1);
+}
