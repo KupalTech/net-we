@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Container, Row, Col, Table, Button, Badge, Spinner, Modal } from 'react-bootstrap';
+import { useState, useEffect, useMemo } from 'react';
+import { Container, Row, Col, Table, Button, Badge, Spinner, Modal, Card } from 'react-bootstrap';
 import { collection, query, where, getDocs, doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { ref, onValue, query as rtQuery, orderByChild, equalTo } from 'firebase/database';
 import { db, realtimeDb } from '../firebase/config';
@@ -139,6 +139,15 @@ const Dashboard = () => {
     return contactStatuses[userId] || CONTACT_STATUS.NO_CONTACT;
   };
 
+  // Usuarios Contactados primero, el resto mantiene el orden recibido
+  const sortedUsers = useMemo(() => {
+    return [...users].sort((a, b) => {
+      const aContacted = getContactStatus(a.uid) === CONTACT_STATUS.CONTACTED;
+      const bContacted = getContactStatus(b.uid) === CONTACT_STATUS.CONTACTED;
+      return aContacted === bContacted ? 0 : aContacted ? -1 : 1;
+    });
+  }, [users, contactStatuses]);
+
   const handleSendRequest = async (targetUser) => {
     try {
       const requestId = `${currentUser.uid}_${targetUser.uid}`;
@@ -217,6 +226,46 @@ const Dashboard = () => {
     }
   };
 
+  const renderActionButtons = (user, status, isContacted, unreadCount) => (
+    <div className="d-flex gap-2 flex-wrap">
+      {status === CONTACT_STATUS.NO_CONTACT && (
+        <Button
+          size="sm"
+          variant="primary"
+          onClick={() => handleSendRequest(user)}
+        >
+          Solicitar Reunión
+        </Button>
+      )}
+
+      {status === CONTACT_STATUS.REQUEST_SENT && (
+        <Button size="sm" variant="warning" disabled>
+          Solicitud Enviada
+        </Button>
+      )}
+
+      {isContacted && (
+        <Button
+          size="sm"
+          variant="success"
+          onClick={() => window.location.href = `/chat/${user.uid}`}
+          className="position-relative chat-button"
+        >
+          <FaComments size={18} />
+          {unreadCount > 0 && (
+            <Badge
+              bg="danger"
+              pill
+              className="position-absolute top-0 start-100 translate-middle"
+            >
+              {unreadCount}
+            </Badge>
+          )}
+        </Button>
+      )}
+    </div>
+  );
+
   if (loading) {
     return (
       <>
@@ -235,7 +284,7 @@ const Dashboard = () => {
       <Container fluid className="dashboard-container py-4">
         <Row className="mb-4">
           <Col>
-            <h2 className="dashboard-title">Usuarios Conectados</h2>
+            <h2 className="dashboard-title">Comunidad Net-we</h2>
             <p className="text-muted">
               Conecta con otros emprendedores de la comunidad
             </p>
@@ -244,7 +293,8 @@ const Dashboard = () => {
 
         <Row>
           <Col>
-            <div className="table-responsive">
+            {/* Tabla: solo desktop/tablet */}
+            <div className="table-responsive d-none d-md-block">
               <Table hover className="users-table">
                 <thead>
                   <tr>
@@ -252,23 +302,21 @@ const Dashboard = () => {
                     <th>Empresa</th>
                     <th>Vertical</th>
                     <th>Rol</th>
-                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => {
+                  {sortedUsers.map((user) => {
                     const status = getContactStatus(user.uid);
                     const isContacted = status === CONTACT_STATUS.CONTACTED;
-                    
                     const unreadCount = unreadCounts[user.uid] || 0;
-                    
+
                     return (
                       <tr key={user.uid}>
                         <td>
                           {isContacted ? (
-                            <Link 
-                              to={`/perfil/${user.uid}`} 
+                            <Link
+                              to={`/perfil/${user.uid}`}
                               className="user-name-link"
                             >
                               {user.nombre} {user.apellido}
@@ -292,60 +340,69 @@ const Dashboard = () => {
                         </td>
                         <td>{user.rol}</td>
                         <td>
-                          <Badge 
-                            bg={
-                              status === CONTACT_STATUS.CONTACTED ? 'success' :
-                              status === CONTACT_STATUS.REQUEST_SENT ? 'warning' :
-                              'secondary'
-                            }
-                          >
-                            {status}
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2 flex-wrap">
-                            {status === CONTACT_STATUS.NO_CONTACT && (
-                              <Button 
-                                size="sm" 
-                                variant="primary"
-                                onClick={() => handleSendRequest(user)}
-                              >
-                                Solicitar Reunión
-                              </Button>
-                            )}
-                            
-                            {status === CONTACT_STATUS.REQUEST_SENT && (
-                              <Button size="sm" variant="warning" disabled>
-                                Solicitud Enviada
-                              </Button>
-                            )}
-                            
-                            {isContacted && (
-                              <Button 
-                                size="sm" 
-                                variant="success"
-                                onClick={() => window.location.href = `/chat/${user.uid}`}
-                                className="position-relative chat-button"
-                              >
-                                <FaComments size={18} />
-                                {unreadCount > 0 && (
-                                  <Badge 
-                                    bg="danger" 
-                                    pill 
-                                    className="position-absolute top-0 start-100 translate-middle"
-                                  >
-                                    {unreadCount}
-                                  </Badge>
-                                )}
-                              </Button>
-                            )}
-                          </div>
+                          {renderActionButtons(user, status, isContacted, unreadCount)}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </Table>
+            </div>
+
+            {/* Tarjetas: solo mobile */}
+            <div className="users-cards d-md-none">
+              {sortedUsers.map((user) => {
+                const status = getContactStatus(user.uid);
+                const isContacted = status === CONTACT_STATUS.CONTACTED;
+                const unreadCount = unreadCounts[user.uid] || 0;
+
+                return (
+                  <Card key={user.uid} className="user-card mb-3">
+                    <Card.Body>
+                      <div className="d-flex align-items-center gap-3 mb-2">
+                        <img
+                          src={user.avatar}
+                          alt="Avatar"
+                          className="user-card-avatar"
+                        />
+                        <div>
+                          {isContacted ? (
+                            <Link
+                              to={`/perfil/${user.uid}`}
+                              className="user-name-link"
+                            >
+                              {user.nombre} {user.apellido}
+                            </Link>
+                          ) : (
+                            <span className="fw-semibold">
+                              {user.nombre} {user.apellido}
+                            </span>
+                          )}
+                          <div className="text-muted small">{user.empresa}</div>
+                        </div>
+                      </div>
+
+                      <div className="mb-2">
+                        <span className="text-muted small me-1">Rol:</span>
+                        <span className="small">{user.rol}</span>
+                      </div>
+
+                      <div className="verticals-cell mb-3">
+                        {user.verticales?.slice(0, 2).map((v, idx) => (
+                          <Badge key={idx} bg="info" className="me-1 mb-1">
+                            {v}
+                          </Badge>
+                        ))}
+                        {user.verticales?.length > 2 && (
+                          <Badge bg="secondary">+{user.verticales.length - 2}</Badge>
+                        )}
+                      </div>
+
+                      {renderActionButtons(user, status, isContacted, unreadCount)}
+                    </Card.Body>
+                  </Card>
+                );
+              })}
             </div>
           </Col>
         </Row>

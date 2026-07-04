@@ -99,13 +99,21 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  // Refrescar perfil tras editarlo, para que el resto de la app vea los datos nuevos sin recargar
+  const refreshUserProfile = async () => {
+    if (currentUser) {
+      await loadUserProfile(currentUser.uid);
+    }
+  };
+
   const value = {
     currentUser,
     userProfile,
     signup,
     login,
     logout,
-    loading
+    loading,
+    refreshUserProfile
   };
 
   return (

@@ -101,9 +101,31 @@ const Chat = () => {
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('es-AR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const isSameDay = (timestampA, timestampB) => {
+    const a = new Date(timestampA);
+    const b = new Date(timestampB);
+    return a.toDateString() === b.toDateString();
+  };
+
+  const formatDateLabel = (timestamp) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) return 'Hoy';
+    if (date.toDateString() === yesterday.toDateString()) return 'Ayer';
+
+    return date.toLocaleDateString('es-AR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     });
   };
 
@@ -153,13 +175,21 @@ const Chat = () => {
                       <p>¡Envía el primer mensaje!</p>
                     </div>
                   ) : (
-                    messages.map((message) => {
+                    messages.map((message, index) => {
                       const isOwn = message.senderId === currentUser.uid;
+                      const previousMessage = messages[index - 1];
+                      const showDateDivider = !previousMessage || !isSameDay(message.timestamp, previousMessage.timestamp);
+
                       return (
-                        <ListGroup.Item 
-                          key={message.id} 
+                        <ListGroup.Item
+                          key={message.id}
                           className="border-0 px-0"
                         >
+                          {showDateDivider && (
+                            <div className="chat-date-divider">
+                              <span>{formatDateLabel(message.timestamp)}</span>
+                            </div>
+                          )}
                           <div className={`message ${isOwn ? 'message-own' : 'message-other'}`}>
                             <div className="message-bubble">
                               <p className="mb-1">{message.text}</p>

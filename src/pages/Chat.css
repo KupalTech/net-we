@@ -29,6 +29,22 @@
   overflow-y: auto;
 }
 
+.chat-date-divider {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.chat-date-divider span {
+  background: #e9ecef;
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.9rem;
+  border-radius: 15px;
+  text-transform: capitalize;
+}
+
 .message {
   display: flex;
   margin-bottom: 1rem;

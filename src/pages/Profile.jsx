@@ -115,17 +115,19 @@ const Profile = () => {
                 </div>
 
                 {/* Información de contacto */}
-                <Card className="mb-3 info-card">
-                  <Card.Body>
-                    <h5 className="section-title">
-                      <FaEnvelope className="me-2" />
-                      Información de Contacto
-                    </h5>
-                    <p className="mb-0">
-                      <strong>Email:</strong> {profile.email}
-                    </p>
-                  </Card.Body>
-                </Card>
+                {isOwnProfile && (
+                  <Card className="mb-3 info-card">
+                    <Card.Body>
+                      <h5 className="section-title">
+                        <FaEnvelope className="me-2" />
+                        Información de Contacto
+                      </h5>
+                      <p className="mb-0">
+                        <strong>Email:</strong> {profile.email}
+                      </p>
+                    </Card.Body>
+                  </Card>
+                )}
 
                 {/* Información profesional */}
                 <Card className="mb-3 info-card">

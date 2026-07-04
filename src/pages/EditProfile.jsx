@@ -11,7 +11,7 @@ import './EditProfile.css';
 
 const EditProfile = () => {
   const navigate = useNavigate();
-  const { currentUser, userProfile } = useAuth();
+  const { currentUser, userProfile, refreshUserProfile } = useAuth();
   
   const [formData, setFormData] = useState({
     nombre: '',
@@ -118,9 +118,11 @@ const EditProfile = () => {
         updatedAt: new Date().toISOString()
       });
 
-      setMessage({ 
-        type: 'success', 
-        text: 'Perfil actualizado correctamente' 
+      await refreshUserProfile();
+
+      setMessage({
+        type: 'success',
+        text: 'Perfil actualizado correctamente'
       });
 
       setTimeout(() => {
