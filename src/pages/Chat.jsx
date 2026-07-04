@@ -1,11 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Form, Button, Card, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Card, ListGroup, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ref, push, onValue, query, orderByChild, update } from 'firebase/database';
-import { doc, getDoc } from 'firebase/firestore';
-import { realtimeDb, db } from '../firebase/config';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  writeBatch
+} from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
+import { CONTACT_STATUS } from '../utils/constants';
 import { FaPaperPlane, FaArrowLeft } from 'react-icons/fa';
 import './Chat.css';
 
@@ -16,9 +25,35 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [otherUser, setOtherUser] = useState(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
   const messagesEndRef = useRef(null);
 
   const chatId = [currentUser.uid, userId].sort().join('_');
+
+  // Verificar que el usuario realmente esté Contactado antes de habilitar el chat.
+  // Antes esto solo se controlaba ocultando el botón en el Dashboard.
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        const contactDoc = await getDoc(doc(db, 'contacts', `${currentUser.uid}_${userId}`));
+        if (contactDoc.exists() && contactDoc.data().status === CONTACT_STATUS.CONTACTED) {
+          setAuthorized(true);
+        } else {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error verificando acceso al chat:', error);
+        navigate('/dashboard');
+      } finally {
+        setCheckingAccess(false);
+      }
+    };
+
+    if (userId) {
+      checkAccess();
+    }
+  }, [userId, currentUser.uid, navigate]);
 
   // Cargar datos del otro usuario
   useEffect(() => {
@@ -40,38 +75,42 @@ const Chat = () => {
 
   // Cargar mensajes en tiempo real y marcar como leídos
   useEffect(() => {
-    const messagesRef = ref(realtimeDb, `chats/${chatId}/messages`);
-    const messagesQuery = query(messagesRef, orderByChild('timestamp'));
+    if (!authorized) return;
 
-    const unsubscribe = onValue(messagesQuery, (snapshot) => {
+    const messagesRef = collection(db, 'chats', chatId, 'messages');
+    const messagesQuery = query(messagesRef, orderBy('timestamp'));
+
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
       const messagesData = [];
-      const updates = {};
-      
-      snapshot.forEach((childSnapshot) => {
-        const message = childSnapshot.val();
+      const unreadRefs = [];
+
+      snapshot.forEach((docSnap) => {
+        const message = docSnap.data();
         messagesData.push({
-          id: childSnapshot.key,
+          id: docSnap.id,
           ...message
         });
-        
+
         // Marcar como leído si el mensaje es del otro usuario y no está leído
         if (message.senderId === userId && !message.read) {
-          updates[`chats/${chatId}/messages/${childSnapshot.key}/read`] = true;
+          unreadRefs.push(docSnap.ref);
         }
       });
-      
+
       setMessages(messagesData);
-      
+
       // Actualizar mensajes como leídos
-      if (Object.keys(updates).length > 0) {
-        update(ref(realtimeDb), updates).catch(error => {
+      if (unreadRefs.length > 0) {
+        const batch = writeBatch(db);
+        unreadRefs.forEach((msgRef) => batch.update(msgRef, { read: true }));
+        batch.commit().catch((error) => {
           console.error('Error marcando mensajes como leídos:', error);
         });
       }
     });
 
     return () => unsubscribe();
-  }, [chatId, userId]);
+  }, [authorized, chatId, userId]);
 
   // Scroll automático al último mensaje
   useEffect(() => {
@@ -84,12 +123,13 @@ const Chat = () => {
     if (!newMessage.trim()) return;
 
     try {
-      const messagesRef = ref(realtimeDb, `chats/${chatId}/messages`);
-      await push(messagesRef, {
+      const messagesRef = collection(db, 'chats', chatId, 'messages');
+      await addDoc(messagesRef, {
         text: newMessage,
         senderId: currentUser.uid,
         senderName: `${userProfile.nombre} ${userProfile.apellido}`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        read: false
       });
 
       setNewMessage('');
@@ -128,6 +168,21 @@ const Chat = () => {
       year: 'numeric'
     });
   };
+
+  if (checkingAccess) {
+    return (
+      <>
+        <Navbar />
+        <Container className="text-center mt-5">
+          <Spinner animation="border" variant="primary" />
+        </Container>
+      </>
+    );
+  }
+
+  if (!authorized) {
+    return null;
+  }
 
   return (
     <>

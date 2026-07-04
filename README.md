@@ -6,7 +6,7 @@ Aplicación web responsive para facilitar el contacto y networking entre emprend
 ## Stack Tecnológico
 - **Frontend**: React + Vite
 - **Estilos**: Bootstrap 5 + React Bootstrap
-- **Backend**: Firebase (Authentication, Firestore, Realtime Database)
+- **Backend**: Firebase (Authentication, Firestore)
 - **Hosting**: Vercel
 
 ## Características Principales
@@ -28,8 +28,7 @@ npm install
 1. Crear un proyecto en [Firebase Console](https://console.firebase.google.com/)
 2. Habilitar Authentication (Email/Password)
 3. Crear una base de datos Firestore
-4. Crear una Realtime Database
-5. Copiar las credenciales de configuración
+4. Copiar las credenciales de configuración
 
 ### 3. Variables de entorno
 Copiar `.env.example` a `.env` y completar con las credenciales de Firebase:

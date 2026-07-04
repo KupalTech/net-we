@@ -13,8 +13,7 @@ npm install
 1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com/)
 2. Habilita **Authentication** (Email/Password)
 3. Crea **Firestore Database** (modo prueba)
-4. Crea **Realtime Database** (modo prueba)
-5. Copia las credenciales de configuración
+4. Copia las credenciales de configuración
 
 **Ver guía completa:** `FIREBASE_SETUP.md`
 
@@ -58,7 +57,6 @@ vercel
 - [ ] Proyecto Firebase creado
 - [ ] Authentication habilitado (Email/Password)
 - [ ] Firestore Database creado
-- [ ] Realtime Database creado
 - [ ] Variables de entorno configuradas en `.env`
 - [ ] Dependencias instaladas (`npm install`)
 - [ ] Aplicación corriendo localmente (`npm run dev`)
@@ -124,8 +122,7 @@ vercel
 - **Routing**: React Router DOM v6
 - **Backend**: Firebase
   - Authentication
-  - Firestore (datos estructurados)
-  - Realtime Database (chat)
+  - Firestore (datos estructurados y chat en tiempo real)
 - **Hosting**: Vercel
 - **Iconos**: React Icons
 
@@ -195,8 +192,8 @@ vercel --prod        # Deploy a producción
 - Revisa las reglas de seguridad de Firestore
 
 ### El chat no funciona
-- Verifica que Realtime Database esté creado
-- Revisa las reglas de seguridad de Realtime Database
+- El chat vive en Firestore (`chats/{chatId}/messages`), no requiere Realtime Database
+- Revisa las reglas de seguridad de Firestore en `FIREBASE_SETUP.md`
 
 ### Error 404 en rutas
 - Verifica que `vercel.json` esté configurado correctamente

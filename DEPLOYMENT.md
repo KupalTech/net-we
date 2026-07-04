@@ -42,7 +42,6 @@ VITE_FIREBASE_PROJECT_ID=tu_proyecto_id
 VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
 VITE_FIREBASE_APP_ID=tu_app_id
-VITE_FIREBASE_DATABASE_URL=https://tu_proyecto.firebaseio.com
 ```
 
 ### Paso 4: Deploy
@@ -91,7 +90,6 @@ vercel env add VITE_FIREBASE_PROJECT_ID
 vercel env add VITE_FIREBASE_STORAGE_BUCKET
 vercel env add VITE_FIREBASE_MESSAGING_SENDER_ID
 vercel env add VITE_FIREBASE_APP_ID
-vercel env add VITE_FIREBASE_DATABASE_URL
 ```
 
 ## Configuración de Firebase para Producción
@@ -105,7 +103,7 @@ vercel env add VITE_FIREBASE_DATABASE_URL
 
 ### Actualizar reglas de seguridad
 
-Asegúrate de cambiar las reglas de Firestore y Realtime Database del modo de prueba al modo de producción (ver `FIREBASE_SETUP.md`).
+Asegúrate de cambiar las reglas de Firestore del modo de prueba al modo de producción (ver `FIREBASE_SETUP.md`).
 
 ## Verificación Post-Deployment
 
@@ -217,7 +215,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/database']
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
         }
       }
     }

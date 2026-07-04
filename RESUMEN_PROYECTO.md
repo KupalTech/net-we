@@ -110,8 +110,8 @@
 - ✅ Actualización en tiempo real de estados
 
 ### 6. Chat entre Usuarios Contactados ✅
-- ✅ Chat en tiempo real usando Firebase Realtime Database
-- ✅ Solo disponible para usuarios con estado "Contactado"
+- ✅ Chat en tiempo real usando Firestore (subcolección `chats/{chatId}/messages`)
+- ✅ Solo disponible para usuarios con estado "Contactado" (validado también en el backend, no solo ocultando el botón)
 - ✅ Interfaz moderna con burbujas de mensajes
 - ✅ Scroll automático a último mensaje
 - ✅ Indicador de hora de envío
@@ -143,10 +143,9 @@
 - ✅ **React Hook Form 7.50.0** para manejo de formularios
 
 ### Backend
-- ✅ **Firebase 10.8.0**
+- ✅ **Firebase 12.x**
   - Firebase Authentication (Email/Password)
-  - Firestore Database (datos estructurados)
-  - Realtime Database (chat en tiempo real)
+  - Firestore Database (datos estructurados y chat en tiempo real)
 
 ### Deployment
 - ✅ Configurado para **Vercel**
@@ -298,17 +297,15 @@ net-we/
 }
 ```
 
-### Realtime Database
-
-```
-chats/
-  {chatId}/
-    messages/
-      {messageId}/
-        text: string
-        senderId: string
-        senderName: string
-        timestamp: number
+#### `chats/{chatId}/messages` (subcolección)
+```javascript
+{
+  text: string,
+  senderId: string,
+  senderName: string,
+  timestamp: number,
+  read: boolean
+}
 ```
 
 ---
@@ -422,9 +419,9 @@ vercel --prod
 ### Firebase
 - ✅ Authentication
 - ✅ Firestore (NoSQL)
-- ✅ Realtime Database
-- ✅ Real-time listeners
+- ✅ Real-time listeners (onSnapshot)
 - ✅ Queries y filtros
+- ✅ Reglas de seguridad con validación cruzada entre colecciones (get()/exists())
 
 ### JavaScript/ES6+
 - ✅ Arrow Functions

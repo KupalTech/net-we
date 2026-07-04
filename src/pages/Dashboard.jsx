@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Table, Button, Badge, Spinner, Modal, Card } from 'react-bootstrap';
-import { collection, query, where, getDocs, doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
-import { ref, onValue, query as rtQuery, orderByChild, equalTo } from 'firebase/database';
-import { db, realtimeDb } from '../firebase/config';
+import { collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { CONTACT_STATUS, REQUEST_STATUS } from '../utils/constants';
 import { FaComments } from 'react-icons/fa';
@@ -12,6 +11,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const { currentUser, userProfile } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [contactStatuses, setContactStatuses] = useState({});
@@ -108,18 +108,18 @@ const Dashboard = () => {
       const status = contactStatuses[user.uid];
       if (status === CONTACT_STATUS.CONTACTED) {
         const chatId = [currentUser.uid, user.uid].sort().join('_');
-        const messagesRef = ref(realtimeDb, `chats/${chatId}/messages`);
+        const messagesRef = collection(db, 'chats', chatId, 'messages');
 
-        const unsubscribe = onValue(messagesRef, (snapshot) => {
+        const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
           let unreadCount = 0;
-          snapshot.forEach((childSnapshot) => {
-            const message = childSnapshot.val();
+          snapshot.forEach((docSnap) => {
+            const message = docSnap.data();
             // Contar mensajes del otro usuario que no han sido leídos
             if (message.senderId === user.uid && !message.read) {
               unreadCount++;
             }
           });
-          
+
           setUnreadCounts(prev => ({
             ...prev,
             [user.uid]: unreadCount
@@ -178,8 +178,7 @@ const Dashboard = () => {
   const handleAcceptRequest = async (request) => {
     try {
       // Actualizar estado de la solicitud
-      await setDoc(doc(db, 'meetingRequests', request.id), {
-        ...request,
+      await updateDoc(doc(db, 'meetingRequests', request.id), {
         status: REQUEST_STATUS.ACCEPTED,
         updatedAt: new Date().toISOString()
       });
@@ -215,8 +214,7 @@ const Dashboard = () => {
 
   const handleRejectRequest = async (request) => {
     try {
-      await setDoc(doc(db, 'meetingRequests', request.id), {
-        ...request,
+      await updateDoc(doc(db, 'meetingRequests', request.id), {
         status: REQUEST_STATUS.REJECTED,
         updatedAt: new Date().toISOString()
       });
@@ -248,7 +246,7 @@ const Dashboard = () => {
         <Button
           size="sm"
           variant="success"
-          onClick={() => window.location.href = `/chat/${user.uid}`}
+          onClick={() => navigate(`/chat/${user.uid}`)}
           className="position-relative chat-button"
         >
           <FaComments size={18} />

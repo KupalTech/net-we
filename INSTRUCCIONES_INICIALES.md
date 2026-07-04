@@ -84,13 +84,7 @@ Esto instalará todas las dependencias necesarias.
 4. Elige la ubicación más cercana
 5. Habilitar
 
-#### 3.4. Crear Realtime Database
-1. En el menú lateral: **Build > Realtime Database**
-2. Clic en "Crear base de datos"
-3. Selecciona **"Comenzar en modo de prueba"** (para desarrollo)
-4. Habilitar
-
-#### 3.5. Obtener Credenciales
+#### 3.4. Obtener Credenciales
 1. En el menú lateral: **Configuración del proyecto** (ícono engranaje)
 2. En "Tus apps", clic en **</>** (Web)
 3. Registra la app: nombre "net-we-web"
@@ -108,7 +102,6 @@ VITE_FIREBASE_PROJECT_ID=tu_proyecto_id
 VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
 VITE_FIREBASE_APP_ID=tu_app_id
-VITE_FIREBASE_DATABASE_URL=https://tu_proyecto.firebaseio.com
 ```
 
 **IMPORTANTE:** Reemplaza todos los valores con los de tu proyecto Firebase.
@@ -233,8 +226,7 @@ npm install
 - Reinicia el servidor de desarrollo
 
 ### "Permission denied" en Firebase
-- Verifica que las reglas de Firestore estén en modo de prueba
-- Verifica que las reglas de Realtime Database estén en modo de prueba
+- Verifica que las reglas de Firestore estén en modo de prueba (o revisa `FIREBASE_SETUP.md` si ya estás en modo producción)
 
 ### La página se recarga y pierde la ruta
 - Esto es normal en desarrollo
@@ -250,7 +242,6 @@ Antes de considerar que todo funciona:
 - [ ] Proyecto Firebase creado
 - [ ] Authentication habilitado
 - [ ] Firestore Database creado
-- [ ] Realtime Database creado
 - [ ] Archivo `.env` creado con credenciales
 - [ ] `npm run dev` ejecutado sin errores
 - [ ] Aplicación abre en el navegador

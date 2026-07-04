@@ -24,74 +24,105 @@
 4. Selecciona la ubicación (preferiblemente cercana a tus usuarios)
 5. Haz clic en "Habilitar"
 
+> **Nota**: la app usa únicamente **Firestore** — no se necesita Realtime Database. El chat en tiempo real se guarda como subcolección `chats/{chatId}/messages` dentro de Firestore.
+
 ### Reglas de Seguridad de Firestore (Modo Producción)
 
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Usuarios: solo lectura pública, escritura propia
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Existe un meetingRequest aceptado entre u1 y u2 (en cualquier direccion)
+    function hasAcceptedRequest(u1, u2) {
+      return (exists(/databases/$(database)/documents/meetingRequests/$(u1 + '_' + u2)) &&
+              get(/databases/$(database)/documents/meetingRequests/$(u1 + '_' + u2)).data.status == 'accepted')
+          || (exists(/databases/$(database)/documents/meetingRequests/$(u2 + '_' + u1)) &&
+              get(/databases/$(database)/documents/meetingRequests/$(u2 + '_' + u1)).data.status == 'accepted');
+    }
+
+    // Usuarios: lectura pública (autenticado), escritura propia
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
-    
-    // Contactos: solo el propietario puede leer/escribir
+
+    // Contactos: "Contactado" solo se puede alcanzar si existe una solicitud aceptada
     match /contacts/{contactId} {
-      allow read, write: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || resource.data.contactId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+        request.resource.data.userId != request.resource.data.contactId &&
+        (
+          (request.resource.data.userId == request.auth.uid &&
+           request.resource.data.status != 'Contactado') ||
+          (
+            (request.resource.data.userId == request.auth.uid || request.resource.data.contactId == request.auth.uid) &&
+            request.resource.data.status == 'Contactado' &&
+            hasAcceptedRequest(request.resource.data.userId, request.resource.data.contactId)
+          )
+        );
+
+      allow update: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || resource.data.contactId == request.auth.uid) &&
+        (
+          request.resource.data.status != 'Contactado' ||
+          hasAcceptedRequest(request.resource.data.userId, request.resource.data.contactId)
+        );
     }
-    
-    // Solicitudes de reunión: lectura para involucrados, escritura controlada
+
+    // Solicitudes de reunión: crea el remitente, acepta/rechaza solo el receptor
     match /meetingRequests/{requestId} {
-      allow read: if request.auth != null && 
-        (resource.data.senderId == request.auth.uid || 
-         resource.data.receiverId == request.auth.uid);
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && 
-        resource.data.receiverId == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+        request.resource.data.senderId == request.auth.uid &&
+        request.resource.data.receiverId != request.auth.uid &&
+        request.resource.data.status == 'pending';
+
+      allow update: if isSignedIn() &&
+        resource.data.receiverId == request.auth.uid &&
+        resource.data.status == 'pending' &&
+        request.resource.data.senderId == resource.data.senderId &&
+        request.resource.data.receiverId == resource.data.receiverId &&
+        request.resource.data.status in ['accepted', 'rejected'];
     }
-    
-    // Chats: solo participantes pueden leer/escribir
+
+    // Chats: solo participantes, y solo se crean si hay una solicitud aceptada
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && 
-        request.auth.uid in resource.data.participants;
-    }
-  }
-}
-```
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
 
-## Paso 4: Crear Realtime Database
+      allow create: if isSignedIn() &&
+        request.auth.uid in request.resource.data.participants &&
+        request.resource.data.participants.size() == 2 &&
+        hasAcceptedRequest(request.resource.data.participants[0], request.resource.data.participants[1]);
 
-1. En el menú lateral, ve a **Build > Realtime Database**
-2. Haz clic en "Crear base de datos"
-3. Selecciona la ubicación
-4. Selecciona el modo de inicio:
-   - **Modo de prueba** (para desarrollo)
-   - **Modo bloqueado** (para producción con reglas de seguridad)
-5. Haz clic en "Habilitar"
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participants;
 
-### Reglas de Seguridad de Realtime Database (Modo Producción)
+      // Mensajes del chat (subcolección)
+      match /messages/{messageId} {
+        allow read: if isSignedIn() &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
 
-```json
-{
-  "rules": {
-    "chats": {
-      "$chatId": {
-        ".read": "auth != null",
-        ".write": "auth != null",
-        "messages": {
-          "$messageId": {
-            ".validate": "newData.hasChildren(['text', 'senderId', 'senderName', 'timestamp'])"
-          }
-        }
+        allow create: if isSignedIn() &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants &&
+          request.resource.data.senderId == request.auth.uid;
+
+        allow update: if isSignedIn() &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
       }
     }
   }
 }
 ```
 
-## Paso 5: Obtener Credenciales de Configuración
+## Paso 4: Obtener Credenciales de Configuración
 
 1. En el menú lateral, ve a **Configuración del proyecto** (ícono de engranaje)
 2. En la sección "Tus apps", haz clic en el ícono **</>** (Web)
@@ -100,7 +131,7 @@ service cloud.firestore {
 5. Haz clic en "Registrar app"
 6. Copia las credenciales que aparecen en `firebaseConfig`
 
-## Paso 6: Configurar Variables de Entorno
+## Paso 5: Configurar Variables de Entorno
 
 1. En la raíz del proyecto, crea un archivo `.env`
 2. Copia el contenido de `.env.example`
@@ -113,10 +144,9 @@ VITE_FIREBASE_PROJECT_ID=tu_proyecto_id
 VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
 VITE_FIREBASE_APP_ID=tu_app_id
-VITE_FIREBASE_DATABASE_URL=https://tu_proyecto.firebaseio.com
 ```
 
-## Paso 7: Estructura de Datos en Firestore
+## Paso 6: Estructura de Datos en Firestore
 
 ### Colección: `users`
 ```javascript
@@ -164,17 +194,15 @@ VITE_FIREBASE_DATABASE_URL=https://tu_proyecto.firebaseio.com
 }
 ```
 
-## Paso 8: Estructura de Datos en Realtime Database
-
-```
-chats/
-  {chatId}/
-    messages/
-      {messageId}/
-        text: "Mensaje..."
-        senderId: "user_id"
-        senderName: "Juan Pérez"
-        timestamp: 1717707600000
+### Subcolección: `chats/{chatId}/messages`
+```javascript
+{
+  text: "Mensaje...",
+  senderId: "user_id",
+  senderName: "Juan Pérez",
+  timestamp: 1717707600000,
+  read: false
+}
 ```
 
 ## Notas Importantes
@@ -205,7 +233,4 @@ Para verificar que todo está configurado correctamente:
 ### Error: "Missing or insufficient permissions"
 - Revisa las reglas de seguridad de Firestore
 - En desarrollo, puedes usar modo de prueba temporalmente
-
-### Error: "PERMISSION_DENIED: Permission denied"
-- Revisa las reglas de seguridad de Realtime Database
-- Asegúrate de que el usuario esté autenticado
+- Si el error aparece justo al aceptar una solicitud o abrir un chat, verifica que exista un `meetingRequests` con `status: "accepted"` entre ambos usuarios (las reglas lo exigen antes de permitir `contacts`/`chats` en estado "Contactado")

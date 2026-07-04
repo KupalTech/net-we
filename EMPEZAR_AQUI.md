@@ -62,14 +62,7 @@ npm install
 - [ ] Clic en "Habilitar"
 - [ ] Esperar a que se cree
 
-#### 3.4. Crear Realtime Database
-- [ ] En el menú lateral: **Build → Realtime Database**
-- [ ] Clic en "Crear base de datos"
-- [ ] Elegir ubicación (ej: us-central1)
-- [ ] Seleccionar **"Comenzar en modo de prueba"**
-- [ ] Clic en "Habilitar"
-
-#### 3.5. Obtener Credenciales
+#### 3.4. Obtener Credenciales
 - [ ] En el menú lateral: **Configuración del proyecto** (ícono ⚙️)
 - [ ] Scroll hasta "Tus apps"
 - [ ] Clic en el ícono **</>** (Web)
@@ -93,7 +86,6 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
-VITE_FIREBASE_DATABASE_URL=
 ```
 
 #### 4.2. Completar con tus credenciales
@@ -107,7 +99,6 @@ VITE_FIREBASE_PROJECT_ID=net-we-12345
 VITE_FIREBASE_STORAGE_BUCKET=net-we-12345.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=1:123456789:web:abc123
-VITE_FIREBASE_DATABASE_URL=https://net-we-12345-default-rtdb.firebaseio.com
 ```
 
 - [ ] Guardar el archivo `.env`
@@ -253,17 +244,9 @@ service cloud.firestore {
 - Verifica que Firestore esté creado en Firebase Console
 
 ### El chat no funciona
-- Verifica que Realtime Database esté creado
-- Ve a Realtime Database → Rules
-- Verifica que esté en modo de prueba:
-```json
-{
-  "rules": {
-    ".read": "now < 1735689600000",
-    ".write": "now < 1735689600000"
-  }
-}
-```
+- El chat se guarda en Firestore (`chats/{chatId}/messages`), no requiere Realtime Database
+- Verifica que ambos usuarios tengan estado "Contactado" (el chat solo se habilita después de aceptar una solicitud de reunión)
+- Revisa las reglas de seguridad de Firestore en `FIREBASE_SETUP.md`
 
 ---
 
@@ -287,7 +270,6 @@ Antes de considerar que todo está listo:
 - [ ] Proyecto Firebase creado
 - [ ] Authentication habilitado
 - [ ] Firestore Database creado
-- [ ] Realtime Database creado
 - [ ] Archivo `.env` creado y configurado
 - [ ] Aplicación corriendo (`npm run dev`)
 - [ ] Puedo registrar usuarios

@@ -186,7 +186,9 @@ Desarrollado por Kupal © 2026
 
 ### Base de Datos - Realtime Database
 
-**Estructura actualizada de mensajes:**
+> **Actualización posterior:** los mensajes del chat se migraron de Realtime Database a Firestore (`chats/{chatId}/messages`) por una mejora de seguridad — las reglas de Realtime Database no podían validar que el chat correspondiera a una solicitud de reunión realmente aceptada. Ver `FIREBASE_SETUP.md` para la estructura y reglas vigentes. La sección de abajo describe cómo era en esta versión (V2).
+
+**Estructura actualizada de mensajes (histórico, ver nota arriba):**
 ```javascript
 chats/
   {chatId}/
