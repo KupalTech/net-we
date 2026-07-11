@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
   sendEmailVerification
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -31,10 +31,9 @@ export const AuthProvider = ({ children }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Guardar perfil en Firestore
+      // Guardar perfil en Firestore (publico: lo puede leer cualquier usuario verificado)
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
-        email: email,
         nombre: userData.nombre,
         apellido: userData.apellido,
         empresa: userData.empresa,
@@ -43,6 +42,11 @@ export const AuthProvider = ({ children }) => {
         bio: userData.bio || '',
         createdAt: new Date().toISOString(),
         avatar: `https://ui-avatars.com/api/?name=${userData.nombre}+${userData.apellido}&background=random`
+      });
+
+      // El email vive aparte, en un doc que solo el propio usuario puede leer
+      await setDoc(doc(db, 'users', user.uid, 'private', 'contact'), {
+        email: email
       });
 
       await sendEmailVerification(user);
@@ -96,15 +100,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Cargar perfil del usuario
+  // Cargar perfil del usuario (datos publicos + email privado, separados en Firestore)
   const loadUserProfile = async (uid) => {
     try {
       const docRef = doc(db, 'users', uid);
       const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        setUserProfile(docSnap.data());
+
+      if (!docSnap.exists()) return;
+
+      const publicData = docSnap.data();
+      const privateRef = doc(db, 'users', uid, 'private', 'contact');
+      let privateSnap = await getDoc(privateRef);
+
+      // Migracion en caliente: cuentas creadas antes de separar el email
+      if (publicData.email) {
+        if (!privateSnap.exists()) {
+          await setDoc(privateRef, { email: publicData.email });
+          privateSnap = await getDoc(privateRef);
+        }
+        await updateDoc(docRef, { email: deleteField() });
+        delete publicData.email;
       }
+
+      setUserProfile({
+        ...publicData,
+        email: privateSnap.exists() ? privateSnap.data().email : null
+      });
     } catch (error) {
       console.error('Error cargando perfil:', error);
     }
