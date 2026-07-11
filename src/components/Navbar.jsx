@@ -2,6 +2,7 @@ import { Navbar as BootstrapNavbar, Container, Dropdown } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaUserCircle } from 'react-icons/fa';
+import logo from '../assets/logo.png';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -21,7 +22,7 @@ const Navbar = () => {
     <BootstrapNavbar bg="white" className="shadow-sm navbar-custom">
       <Container fluid>
         <BootstrapNavbar.Brand className="navbar-brand-custom">
-          Net-we
+          <img src={logo} alt="Net-we" className="navbar-logo" />
         </BootstrapNavbar.Brand>
         
         <div className="ms-auto">

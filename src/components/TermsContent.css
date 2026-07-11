@@ -1,0 +1,15 @@
+.terms-section {
+  margin-bottom: 1.5rem;
+}
+
+.terms-section h5 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.terms-section p,
+.terms-section li {
+  color: #555;
+  line-height: 1.6;
+}

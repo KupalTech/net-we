@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/logo.png';
 import './Login.css';
 
 const Login = () => {
@@ -69,11 +70,11 @@ const Login = () => {
 
   return (
     <Container className="login-container">
-      <Row className="min-vh-100 align-items-center justify-content-center">
+      <Row className="min-vh-footer-safe align-items-center justify-content-center">
         <Col xs={12} md={6} lg={5} xl={4}>
           <div className="login-card">
             <div className="text-center mb-4">
-              <h2 className="login-title">Net-we</h2>
+              <img src={logo} alt="Net-we" className="login-logo" />
               <p className="text-muted">Inicia sesión en tu cuenta</p>
             </div>
 

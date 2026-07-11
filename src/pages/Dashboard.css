@@ -1,6 +1,7 @@
 .dashboard-container {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - var(--navbar-height));
   background: #f8f9fa;
+  padding-bottom: calc(var(--footer-height) + 1rem);
 }
 
 .dashboard-title {
@@ -16,7 +17,7 @@
 }
 
 .users-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #134070 0%, #0e3054 100%);
   color: white;
 }
 
@@ -36,14 +37,14 @@
 }
 
 .user-name-link {
-  color: #667eea;
+  color: #134070;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
 .user-name-link:hover {
-  color: #764ba2;
+  color: #0e3054;
   text-decoration: underline;
 }
 

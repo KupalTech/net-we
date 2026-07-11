@@ -1,12 +1,18 @@
 .navbar-custom {
   border-bottom: 1px solid #e0e0e0;
+  height: 70px;
   padding: 0.75rem 0;
 }
 
 .navbar-brand-custom {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #667eea !important;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.navbar-logo {
+  height: 146px;
+  width: auto;
 }
 
 .user-dropdown-toggle {
@@ -25,7 +31,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #667eea;
+  border: 2px solid #134070;
   cursor: pointer;
   transition: transform 0.2s ease;
 }

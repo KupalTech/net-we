@@ -1,24 +1,23 @@
 .app-footer {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  margin-top: auto;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.footer-text {
-  font-size: 0.9rem;
-  color: white;
+  background: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1030;
 }
 
 .footer-link {
-  color: white;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
 }
 
-.footer-link:hover {
-  color: #ffd700;
-  border-bottom: 2px solid #ffd700;
+.footer-logo {
+  height: 28px;
+  width: auto;
 }

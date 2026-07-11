@@ -1,0 +1,16 @@
+.terms-container {
+  min-height: calc(100vh - var(--footer-height));
+  background: #f8f9fa;
+  padding-bottom: calc(var(--footer-height) + 1rem);
+}
+
+.terms-card {
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.terms-title {
+  color: #134070;
+  font-weight: 700;
+}

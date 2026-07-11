@@ -4,6 +4,48 @@
   box-sizing: border-box;
 }
 
+/* Color primario de marca (reemplaza el azul/celeste default de Bootstrap) */
+:root {
+  --bs-primary: #134070;
+  --bs-primary-rgb: 19, 64, 112;
+  --navbar-height: 70px;
+  --footer-height: 56px;
+}
+
+/* Reserva el espacio del footer fijo para que no tape contenido */
+.min-vh-footer-safe {
+  min-height: calc(100vh - var(--footer-height));
+}
+
+.btn-primary {
+  --bs-btn-bg: #134070;
+  --bs-btn-border-color: #134070;
+  --bs-btn-hover-bg: #0e3054;
+  --bs-btn-hover-border-color: #0e3054;
+  --bs-btn-active-bg: #0a2440;
+  --bs-btn-active-border-color: #0a2440;
+  --bs-btn-disabled-bg: #134070;
+  --bs-btn-disabled-border-color: #134070;
+  --bs-btn-focus-shadow-rgb: 19, 64, 112;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #134070;
+  --bs-btn-border-color: #134070;
+  --bs-btn-hover-bg: #134070;
+  --bs-btn-hover-border-color: #134070;
+  --bs-btn-active-bg: #134070;
+  --bs-btn-active-border-color: #134070;
+  --bs-btn-disabled-color: #134070;
+  --bs-btn-disabled-border-color: #134070;
+  --bs-btn-focus-shadow-rgb: 19, 64, 112;
+}
+
+.form-check-input:checked {
+  background-color: #134070;
+  border-color: #134070;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -34,12 +76,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #667eea;
+  background: #134070;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #764ba2;
+  background: #0e3054;
 }
 
 /* Animaciones */

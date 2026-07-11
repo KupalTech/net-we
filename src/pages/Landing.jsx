@@ -1,5 +1,7 @@
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
+import banner from '../assets/xe-banner-fanz.png';
 import './Landing.css';
 
 const Landing = () => {
@@ -7,14 +9,22 @@ const Landing = () => {
 
   return (
     <Container fluid className="landing-container">
-      <Row className="min-vh-100 align-items-center justify-content-center">
+      <Row className="justify-content-center">
+        <Col xs={12} md={10} lg={8} xl={6} className="banner-col">
+          <img
+            src={banner}
+            alt="Experiencia Endeavor Patagonia - 20.08 Neuquén"
+            className="landing-banner"
+          />
+        </Col>
+      </Row>
+      <Row className="align-items-center justify-content-center py-4">
         <Col xs={12} md={10} lg={8} xl={6}>
           <Row className="align-items-center">
             {/* Logo */}
             <Col xs={12} md={6} className="text-center mb-4 mb-md-0">
               <div className="logo-container">
-                <h1 className="logo-text">Net-we</h1>
-                <p className="logo-subtitle">Networking para Emprendedores</p>
+                <img src={logo} alt="Net-we" className="logo-image" />
               </div>
             </Col>
 
@@ -26,7 +36,7 @@ const Landing = () => {
                 className="w-75 action-button"
                 onClick={() => navigate('/registro')}
               >
-                Registrarse
+                Registrarme
               </Button>
               <Button 
                 variant="outline-primary" 

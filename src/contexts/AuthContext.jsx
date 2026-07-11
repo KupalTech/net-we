@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
@@ -21,6 +22,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Registro de usuario
@@ -43,10 +45,33 @@ export const AuthProvider = ({ children }) => {
         avatar: `https://ui-avatars.com/api/?name=${userData.nombre}+${userData.apellido}&background=random`
       });
 
+      await sendEmailVerification(user);
+
       return { success: true };
     } catch (error) {
       console.error('Error en registro:', error);
       return { success: false, error: error.message };
+    }
+  };
+
+  // Reenviar email de verificación
+  const resendVerificationEmail = async () => {
+    try {
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Error reenviando verificación:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Releer el estado de verificación desde Firebase (tras hacer click en el link del mail)
+  const refreshEmailVerification = async () => {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
+      setEmailVerified(auth.currentUser.emailVerified);
     }
   };
 
@@ -88,6 +113,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      setEmailVerified(user?.emailVerified || false);
       if (user) {
         await loadUserProfile(user.uid);
       } else {
@@ -109,11 +135,14 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     userProfile,
+    emailVerified,
     signup,
     login,
     logout,
     loading,
-    refreshUserProfile
+    refreshUserProfile,
+    resendVerificationEmail,
+    refreshEmailVerification
   };
 
   return (

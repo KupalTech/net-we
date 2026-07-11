@@ -1,6 +1,7 @@
 .profile-container {
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh - var(--navbar-height));
   background: #f8f9fa;
+  padding-bottom: calc(var(--footer-height) + 1rem);
 }
 
 .profile-card {
@@ -14,7 +15,7 @@
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 5px solid #667eea;
+  border: 5px solid #134070;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -31,7 +32,7 @@
 }
 
 .section-title {
-  color: #667eea;
+  color: #134070;
   font-weight: 600;
   font-size: 1.1rem;
   margin-bottom: 1rem;

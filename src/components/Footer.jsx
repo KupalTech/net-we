@@ -1,25 +1,17 @@
-import { Container } from 'react-bootstrap';
+import logoKupal from '../assets/logo-h-azul.png';
 import './Footer.css';
 
 const Footer = () => {
   return (
     <footer className="app-footer">
-      <Container fluid>
-        <div className="text-center py-3">
-          <p className="mb-0 footer-text">
-            Desarrollado por{' '}
-            <a 
-              href="https://www.instagram.com/kupaltech?igsh=d3YyeXJseGtueWh2" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="footer-link"
-            >
-              Kupal
-            </a>
-            {' '}© {new Date().getFullYear()}
-          </p>
-        </div>
-      </Container>
+      <a
+        href="https://www.instagram.com/kupaltech?igsh=d3YyeXJseGtueWh2"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="footer-link"
+      >
+        <img src={logoKupal} alt="Kupal Tech" className="footer-logo" />
+      </a>
     </footer>
   );
 };

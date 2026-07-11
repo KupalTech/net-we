@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Container, Row, Col, Form, Button, Alert, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, Badge, Modal } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BUSINESS_VERTICALS, COMPANY_ROLES } from '../utils/constants';
+import TermsContent from '../components/TermsContent';
 import './Register.css';
 
 const Register = () => {
@@ -23,6 +24,7 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [showTerms, setShowTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -88,8 +90,8 @@ const Register = () => {
 
     if (!formData.password) {
       newErrors.password = 'La contraseña es requerida';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
     }
 
     if (!formData.confirmPassword) {
@@ -128,9 +130,9 @@ const Register = () => {
     const result = await signup(formData.email, formData.password, userData);
 
     if (result.success) {
-      setMessage({ 
-        type: 'success', 
-        text: 'Usuario dado de alta correctamente' 
+      setMessage({
+        type: 'success',
+        text: 'Usuario dado de alta correctamente. Te enviamos un email para verificar tu cuenta.'
       });
       setTimeout(() => {
         navigate('/dashboard');
@@ -151,8 +153,8 @@ const Register = () => {
         <Col xs={12} md={10} lg={8}>
           <div className="register-card">
             <div className="text-center mb-4">
-              <h2 className="register-title">Registro de Usuario</h2>
-              <p className="text-muted">Únete a la comunidad de emprendedores</p>
+              <h2 className="register-title">Registro</h2>
+              <p className="text-muted">Networking para emprendedores</p>
             </div>
 
             {message.text && (
@@ -164,14 +166,14 @@ const Register = () => {
             <Form onSubmit={handleSubmit}>
               {/* Email */}
               <Form.Group className="mb-3">
-                <Form.Label>Email *</Form.Label>
+                <Form.Label>Correo electrónico *</Form.Label>
                 <Form.Control
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   isInvalid={!!errors.email}
-                  placeholder="tu@email.com"
+                  placeholder="correo@tu-empresa.com"
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.email}
@@ -189,7 +191,7 @@ const Register = () => {
                       value={formData.nombre}
                       onChange={handleChange}
                       isInvalid={!!errors.nombre}
-                      placeholder="Juan"
+                      placeholder="Nombre"
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.nombre}
@@ -205,7 +207,7 @@ const Register = () => {
                       value={formData.apellido}
                       onChange={handleChange}
                       isInvalid={!!errors.apellido}
-                      placeholder="Pérez"
+                      placeholder="Apellido"
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.apellido}
@@ -280,7 +282,7 @@ const Register = () => {
                   onChange={handleChange}
                   isInvalid={!!errors.rol}
                 >
-                  <option value="">Seleccione un rol...</option>
+                  <option value="">Seleccionar</option>
                   {COMPANY_ROLES.map(role => (
                     <option key={role} value={role}>{role}</option>
                   ))}
@@ -292,14 +294,14 @@ const Register = () => {
 
               {/* Bio */}
               <Form.Group className="mb-3">
-                <Form.Label>Bio Breve (Opcional)</Form.Label>
+                <Form.Label>Bio (opcional)</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   name="bio"
                   value={formData.bio}
                   onChange={handleChange}
-                  placeholder="Cuéntanos un poco sobre ti..."
+                  placeholder="Ej: Co-fundadora de una fintech, buscando partners tecnológicos y capital semilla."
                   maxLength={500}
                 />
                 <Form.Text className="text-muted">
@@ -318,7 +320,7 @@ const Register = () => {
                       value={formData.password}
                       onChange={handleChange}
                       isInvalid={!!errors.password}
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.password}
@@ -354,7 +356,7 @@ const Register = () => {
                   label={
                     <span>
                       Acepto los{' '}
-                      <a href="#" onClick={(e) => e.preventDefault()}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setShowTerms(true); }}>
                         Términos y Condiciones
                       </a>
                     </span>
@@ -393,6 +395,20 @@ const Register = () => {
           </div>
         </Col>
       </Row>
+
+      <Modal show={showTerms} onHide={() => setShowTerms(false)} size="lg" scrollable>
+        <Modal.Header closeButton>
+          <Modal.Title>Términos y Condiciones</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <TermsContent />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => setShowTerms(false)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
