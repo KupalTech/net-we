@@ -10,6 +10,11 @@
   font-weight: 700;
 }
 
+.section-heading {
+  color: #134070;
+  font-weight: 700;
+}
+
 .users-table {
   background: white;
   border-radius: 10px;
