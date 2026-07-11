@@ -71,10 +71,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Releer el estado de verificación desde Firebase (tras hacer click en el link del mail)
+  // Releer el estado de verificación desde Firebase (tras hacer click en el link del mail).
+  // reload() actualiza user.emailVerified, pero el ID token que usan las reglas de Firestore
+  // (request.auth.token.email_verified) queda desactualizado hasta que se fuerza su renovación.
   const refreshEmailVerification = async () => {
     if (auth.currentUser) {
       await auth.currentUser.reload();
+      await auth.currentUser.getIdToken(true);
       setEmailVerified(auth.currentUser.emailVerified);
     }
   };
