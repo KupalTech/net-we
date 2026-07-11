@@ -1,7 +1,8 @@
 .profile-container {
   min-height: calc(100vh - var(--navbar-height));
   background: #f8f9fa;
-  padding-bottom: calc(var(--footer-height) + 1rem);
+  padding-top: 1.5rem;
+  padding-bottom: calc(var(--footer-height) + 1.5rem);
 }
 
 .profile-card {

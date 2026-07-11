@@ -69,7 +69,7 @@ const Profile = () => {
   return (
     <>
       <Navbar />
-      <Container className="profile-container py-4">
+      <Container className="profile-container">
         <Row className="mb-3">
           <Col>
             <Button 

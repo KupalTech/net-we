@@ -8,7 +8,7 @@ const Terms = () => {
   const navigate = useNavigate();
 
   return (
-    <Container className="terms-container py-4">
+    <Container className="terms-container">
       <Row className="mb-3">
         <Col>
           <Button
@@ -26,7 +26,7 @@ const Terms = () => {
         <Col xs={12} md={10} lg={8}>
           <Card className="terms-card">
             <Card.Body>
-              <h2 className="terms-title mb-1">Términos y Condiciones</h2>
+              <h2 className="terms-title mb-1">Términos y Condiciones de Uso</h2>
               <TermsContent />
             </Card.Body>
           </Card>

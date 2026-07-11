@@ -1,7 +1,7 @@
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
-import banner from '../assets/xe-banner-fanz.png';
+import banner from '../assets/xe-anuncio-net-we.png';
 import './Landing.css';
 
 const Landing = () => {

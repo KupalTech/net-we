@@ -142,7 +142,7 @@ const EditProfile = () => {
   return (
     <>
       <Navbar />
-      <Container className="edit-profile-container py-4">
+      <Container className="edit-profile-container">
         <Row className="mb-3">
           <Col>
             <Button 

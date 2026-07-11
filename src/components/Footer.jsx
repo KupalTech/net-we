@@ -1,4 +1,4 @@
-import logoKupal from '../assets/logo-h-azul.png';
+import logoKupal from '../assets/logo-h-negro.png';
 import './Footer.css';
 
 const Footer = () => {
@@ -10,6 +10,7 @@ const Footer = () => {
         rel="noopener noreferrer"
         className="footer-link"
       >
+        <span className="footer-text">© {new Date().getFullYear()} | desarrollado por</span>
         <img src={logoKupal} alt="Kupal Tech" className="footer-logo" />
       </a>
     </footer>

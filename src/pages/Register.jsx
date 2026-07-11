@@ -148,7 +148,7 @@ const Register = () => {
   };
 
   return (
-    <Container className="register-container py-5">
+    <Container className="register-container">
       <Row className="justify-content-center">
         <Col xs={12} md={10} lg={8}>
           <div className="register-card">
@@ -398,7 +398,7 @@ const Register = () => {
 
       <Modal show={showTerms} onHide={() => setShowTerms(false)} size="lg" scrollable>
         <Modal.Header closeButton>
-          <Modal.Title>Términos y Condiciones</Modal.Title>
+          <Modal.Title>Términos y Condiciones de Uso</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <TermsContent />

@@ -1,7 +1,8 @@
 .dashboard-container {
   min-height: calc(100vh - var(--navbar-height));
   background: #f8f9fa;
-  padding-bottom: calc(var(--footer-height) + 1rem);
+  padding-top: 1.5rem;
+  padding-bottom: calc(var(--footer-height) + 1.5rem);
 }
 
 .dashboard-title {
@@ -48,8 +49,22 @@
   text-decoration: underline;
 }
 
-.chat-button {
-  min-width: 50px;
+.action-btn {
+  min-width: 160px;
+}
+
+.btn-request-sent {
+  background-color: #719cc1;
+  border-color: #719cc1;
+  color: #ffffff;
+  opacity: 1;
+}
+
+.btn-request-sent:disabled {
+  background-color: #719cc1;
+  border-color: #719cc1;
+  color: #ffffff;
+  opacity: 0.85;
 }
 
 .request-avatar {

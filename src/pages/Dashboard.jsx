@@ -6,7 +6,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { CONTACT_STATUS, REQUEST_STATUS } from '../utils/constants';
-import { FaComments } from 'react-icons/fa';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -230,6 +229,7 @@ const Dashboard = () => {
         <Button
           size="sm"
           variant="primary"
+          className="action-btn"
           onClick={() => handleSendRequest(user)}
         >
           Solicitar Reunión
@@ -237,7 +237,7 @@ const Dashboard = () => {
       )}
 
       {status === CONTACT_STATUS.REQUEST_SENT && (
-        <Button size="sm" variant="warning" disabled>
+        <Button size="sm" disabled className="action-btn btn-request-sent">
           Solicitud Enviada
         </Button>
       )}
@@ -247,9 +247,9 @@ const Dashboard = () => {
           size="sm"
           variant="success"
           onClick={() => navigate(`/chat/${user.uid}`)}
-          className="position-relative chat-button"
+          className="position-relative action-btn chat-button"
         >
-          <FaComments size={18} />
+          Ver mensajes
           {unreadCount > 0 && (
             <Badge
               bg="danger"
@@ -279,12 +279,12 @@ const Dashboard = () => {
   return (
     <>
       <Navbar />
-      <Container fluid className="dashboard-container py-4">
+      <Container fluid className="dashboard-container">
         <Row className="mb-4">
           <Col>
-            <h2 className="dashboard-title">Comunidad Net-we</h2>
+            <h2 className="dashboard-title">Comunidad emprendedora</h2>
             <p className="text-muted">
-              Conecta con otros emprendedores de la comunidad
+              Conectá para hacer networking de valor
             </p>
           </Col>
         </Row>
