@@ -150,8 +150,7 @@ const EditProfile = () => {
               onClick={() => navigate('/perfil')}
               className="p-0 text-dark"
             >
-              <FaArrowLeft className="me-2" />
-              Volver al Perfil
+              <FaArrowLeft size = {20} />
             </Button>
           </Col>
         </Row>

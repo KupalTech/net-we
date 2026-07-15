@@ -5,6 +5,8 @@ import PrivateRoute from './components/PrivateRoute';
 // Pages
 import Landing from './pages/Landing';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Register from './pages/Register';
 import Terms from './pages/Terms';
 import VerifyEmail from './pages/VerifyEmail';
@@ -29,6 +31,8 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/olvide-password" element={<ForgotPassword />} />
+          <Route path="/restablecer-password" element={<ResetPassword />} />
           <Route path="/registro" element={<Register />} />
           <Route path="/terminos" element={<Terms />} />
           <Route path="/verificar-email" element={<VerifyEmail />} />

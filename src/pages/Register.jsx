@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Container, Row, Col, Form, Button, Alert, Badge, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, Badge, Modal, InputGroup } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { BUSINESS_VERTICALS, COMPANY_ROLES } from '../utils/constants';
 import TermsContent from '../components/TermsContent';
 import './Register.css';
@@ -25,6 +26,8 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [showTerms, setShowTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -314,33 +317,55 @@ const Register = () => {
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label>Contraseña *</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      isInvalid={!!errors.password}
-                      placeholder="Mínimo 8 caracteres"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.password}
-                    </Form.Control.Feedback>
+                    <InputGroup hasValidation>
+                      <Form.Control
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        isInvalid={!!errors.password}
+                        placeholder="Mínimo 8 caracteres"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        tabIndex={-1}
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                      <Form.Control.Feedback type="invalid">
+                        {errors.password}
+                      </Form.Control.Feedback>
+                    </InputGroup>
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
                     <Form.Label>Confirmar Contraseña *</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      isInvalid={!!errors.confirmPassword}
-                      placeholder="Repite tu contraseña"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.confirmPassword}
-                    </Form.Control.Feedback>
+                    <InputGroup hasValidation>
+                      <Form.Control
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        isInvalid={!!errors.confirmPassword}
+                        placeholder="Repite tu contraseña"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        tabIndex={-1}
+                        aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                      <Form.Control.Feedback type="invalid">
+                        {errors.confirmPassword}
+                      </Form.Control.Feedback>
+                    </InputGroup>
                   </Form.Group>
                 </Col>
               </Row>

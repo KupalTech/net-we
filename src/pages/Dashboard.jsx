@@ -442,7 +442,7 @@ const Dashboard = () => {
     );
   }
 
-  // La lista de "Descubrir más" no repite a quienes ya aparecen en "Tus Contactos"
+  // La lista de "Ver más comunidad" no repite a quienes ya aparecen en "Mi networking"
   const discoverVisible = discoverUsers.filter(
     (u) => getContactStatus(u.uid) !== CONTACT_STATUS.CONTACTED
   );
@@ -461,7 +461,7 @@ const Dashboard = () => {
         </Row>
 
         {renderUserSection('Mi networking', contactedUsers, {
-          emptyText: 'Todavía no tenés contactos. Enviá una solicitud de reunión desde "Descubrir Más" para empezar.'
+          emptyText: 'Todavía no tenés contactos. Enviá una solicitud de reunión desde "Ver más comunidad" para empezar.'
         })}
 
         {renderUserSection('Ver más comunidad', discoverVisible, {

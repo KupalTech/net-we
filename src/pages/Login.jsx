@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, InputGroup } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -17,6 +18,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -103,21 +105,37 @@ const Login = () => {
 
               <Form.Group className="mb-4">
                 <Form.Label>Contraseña</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  isInvalid={!!errors.password}
-                  placeholder="Tu contraseña"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.password}
-                </Form.Control.Feedback>
+                <InputGroup hasValidation>
+                  <Form.Control
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    isInvalid={!!errors.password}
+                    placeholder="Tu contraseña"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline-secondary"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </Button>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </InputGroup>
+                <div className="text-end mt-1">
+                  <Link to="/olvide-password" className="small">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
               </Form.Group>
 
               <div className="d-grid gap-2">
-                <Button 
+                <Button
                   variant="primary" 
                   type="submit" 
                   size="lg"

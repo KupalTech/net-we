@@ -77,8 +77,7 @@ const Profile = () => {
               onClick={() => navigate('/dashboard')}
               className="p-0 text-dark"
             >
-              <FaArrowLeft className="me-2" />
-              Volver al Dashboard
+              <FaArrowLeft size={20} />
             </Button>
           </Col>
         </Row>

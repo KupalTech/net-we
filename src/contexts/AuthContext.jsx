@@ -4,7 +4,10 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, deleteField } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
@@ -79,6 +82,42 @@ export const AuthProvider = ({ children }) => {
       await auth.currentUser.reload();
       await auth.currentUser.getIdToken(true);
       setEmailVerified(auth.currentUser.emailVerified);
+    }
+  };
+
+  // Enviar email para restablecer contraseña. Siempre devuelve éxito
+  // (no revelamos si ese email está o no registrado, para evitar enumeración de cuentas)
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: `${window.location.origin}/restablecer-password`,
+        handleCodeInApp: true
+      });
+    } catch (error) {
+      console.error('Error enviando email de recuperación:', error);
+    }
+    return { success: true };
+  };
+
+  // Validar el código del link de recuperación y obtener el email asociado
+  const verifyResetCode = async (oobCode) => {
+    try {
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      return { success: true, email };
+    } catch (error) {
+      console.error('Código de recuperación inválido o expirado:', error);
+      return { success: false };
+    }
+  };
+
+  // Confirmar la nueva contraseña usando el código del link
+  const confirmReset = async (oobCode, newPassword) => {
+    try {
+      await confirmPasswordReset(auth, oobCode, newPassword);
+      return { success: true };
+    } catch (error) {
+      console.error('Error confirmando nueva contraseña:', error);
+      return { success: false, error: error.message };
     }
   };
 
@@ -166,7 +205,10 @@ export const AuthProvider = ({ children }) => {
     loading,
     refreshUserProfile,
     resendVerificationEmail,
-    refreshEmailVerification
+    refreshEmailVerification,
+    resetPassword,
+    verifyResetCode,
+    confirmReset
   };
 
   return (
