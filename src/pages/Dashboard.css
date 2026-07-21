@@ -10,6 +10,45 @@
   font-weight: 700;
 }
 
+.vertical-filter-dropdown .dropdown-toggle {
+  width: auto;
+  white-space: nowrap;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .vertical-filter-dropdown .dropdown-toggle {
+    display: flex;
+  }
+}
+
+.vertical-filter-menu {
+  max-height: 320px;
+  overflow-y: auto;
+  min-width: 260px;
+}
+
+.vertical-filter-item {
+  cursor: pointer;
+}
+
+.vertical-filter-item input[type='checkbox'] {
+  position: static;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .vertical-filter-dropdown,
+  .vertical-filter-dropdown .dropdown-toggle {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .section-heading {
   color: #134070;
   font-weight: 700;

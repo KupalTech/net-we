@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Row, Col, Table, Button, Badge, Spinner, Modal, Card } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Badge, Spinner, Modal, Card, Dropdown } from 'react-bootstrap';
 import {
   collection, query, where, getDocs, doc, setDoc, updateDoc, getDoc, onSnapshot,
   orderBy, limit, startAfter
@@ -8,7 +8,7 @@ import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { CONTACT_STATUS, REQUEST_STATUS } from '../utils/constants';
+import { CONTACT_STATUS, REQUEST_STATUS, BUSINESS_VERTICALS } from '../utils/constants';
 import './Dashboard.css';
 
 const PAGE_SIZE = 24;
@@ -26,12 +26,20 @@ const Dashboard = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [verticalFilters, setVerticalFilters] = useState([]);
+
+  // Maximo que acepta Firestore en un where(..., 'array-contains-any', [...])
+  const MAX_VERTICAL_FILTERS = 10;
 
   // Cargar la primera pagina del directorio general (paginado, no trae todos los usuarios de una)
-  const loadDiscoverPage = async (cursor = null) => {
+  const loadDiscoverPage = async (cursor = null, verticals = verticalFilters) => {
     try {
       setLoadingMore(true);
-      const constraints = [orderBy('createdAt'), limit(PAGE_SIZE)];
+      const constraints = [];
+      if (verticals.length > 0) {
+        constraints.push(where('verticales', 'array-contains-any', verticals));
+      }
+      constraints.push(orderBy('createdAt'), limit(PAGE_SIZE));
       if (cursor) constraints.push(startAfter(cursor));
 
       const snapshot = await getDocs(query(collection(db, 'users'), ...constraints));
@@ -56,6 +64,29 @@ const Dashboard = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
+
+  const toggleVerticalFilter = (vertical) => {
+    const isSelected = verticalFilters.includes(vertical);
+    if (!isSelected && verticalFilters.length >= MAX_VERTICAL_FILTERS) return;
+
+    const next = isSelected
+      ? verticalFilters.filter((v) => v !== vertical)
+      : [...verticalFilters, vertical];
+
+    setVerticalFilters(next);
+    setDiscoverUsers([]);
+    setLastDoc(null);
+    setHasMore(true);
+    loadDiscoverPage(null, next);
+  };
+
+  const clearVerticalFilters = () => {
+    setVerticalFilters([]);
+    setDiscoverUsers([]);
+    setLastDoc(null);
+    setHasMore(true);
+    loadDiscoverPage(null, []);
+  };
 
   // Cargar estados de contacto
   useEffect(() => {
@@ -268,7 +299,7 @@ const Dashboard = () => {
           className="action-btn"
           onClick={() => handleSendRequest(user)}
         >
-          Solicitar Reunión
+          Conectemos
         </Button>
       )}
 
@@ -285,7 +316,7 @@ const Dashboard = () => {
           onClick={() => navigate(`/chat/${user.uid}`)}
           className="position-relative action-btn chat-button"
         >
-          Ver mensajes
+          Chat
           {unreadCount > 0 && (
             <Badge
               bg="danger"
@@ -300,10 +331,13 @@ const Dashboard = () => {
     </div>
   );
 
-  const renderUserSection = (title, usersList, { emptyText, footer } = {}) => (
+  const renderUserSection = (title, usersList, { emptyText, footer, filterControl } = {}) => (
     <Row className="mb-4">
       <Col>
-        <h5 className="section-heading mb-3">{title}</h5>
+        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <h5 className="section-heading mb-0">{title}</h5>
+          {filterControl}
+        </div>
 
         {usersList.length === 0 && emptyText && (
           <p className="text-muted">{emptyText}</p>
@@ -465,6 +499,44 @@ const Dashboard = () => {
         })}
 
         {renderUserSection('Ver más comunidad', discoverVisible, {
+          emptyText: 'No hay usuarios que coincidan con ese filtro.',
+          filterControl: (
+            <Dropdown autoClose="outside" className="vertical-filter-dropdown">
+              <Dropdown.Toggle variant="outline-primary" size="sm">
+                {verticalFilters.length === 0
+                  ? 'Todas las verticales'
+                  : verticalFilters.length === 1
+                    ? verticalFilters[0]
+                    : `${verticalFilters.length} verticales seleccionadas`}
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="vertical-filter-menu">
+                <Dropdown.Item as="button" onClick={clearVerticalFilters}>
+                  Todas las verticales
+                </Dropdown.Item>
+                <Dropdown.Divider />
+                {BUSINESS_VERTICALS.map((vertical) => {
+                  const checked = verticalFilters.includes(vertical);
+                  const disabled = !checked && verticalFilters.length >= MAX_VERTICAL_FILTERS;
+                  return (
+                    <Dropdown.Item
+                      key={vertical}
+                      as="label"
+                      className="d-flex align-items-center gap-2 vertical-filter-item"
+                    >
+                      <input
+                        type="checkbox"
+                        className="form-check-input mt-0 flex-shrink-0"
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() => toggleVerticalFilter(vertical)}
+                      />
+                      {vertical}
+                    </Dropdown.Item>
+                  );
+                })}
+              </Dropdown.Menu>
+            </Dropdown>
+          ),
           footer: hasMore && (
             <div className="text-center mt-3">
               <Button

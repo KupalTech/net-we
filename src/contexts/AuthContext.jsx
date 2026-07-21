@@ -52,7 +52,9 @@ export const AuthProvider = ({ children }) => {
         email: email
       });
 
-      await sendEmailVerification(user);
+      await sendEmailVerification(user, {
+        url: `${window.location.origin}/verificar-email`
+      });
 
       return { success: true };
     } catch (error) {
@@ -65,7 +67,9 @@ export const AuthProvider = ({ children }) => {
   const resendVerificationEmail = async () => {
     try {
       if (auth.currentUser) {
-        await sendEmailVerification(auth.currentUser);
+        await sendEmailVerification(auth.currentUser, {
+          url: `${window.location.origin}/verificar-email`
+        });
       }
       return { success: true };
     } catch (error) {
@@ -82,7 +86,9 @@ export const AuthProvider = ({ children }) => {
       await auth.currentUser.reload();
       await auth.currentUser.getIdToken(true);
       setEmailVerified(auth.currentUser.emailVerified);
+      return auth.currentUser.emailVerified;
     }
+    return false;
   };
 
   // Enviar email para restablecer contraseña. Siempre devuelve éxito
