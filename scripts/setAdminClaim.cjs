@@ -19,8 +19,14 @@ if (!uid) {
   process.exit(1);
 }
 
+if (!process.env.GOOGLE_CLOUD_PROJECT) {
+  console.error('Falta la variable GOOGLE_CLOUD_PROJECT con el ID del proyecto de Firebase.');
+  process.exit(1);
+}
+
 initializeApp({
-  credential: applicationDefault()
+  credential: applicationDefault(),
+  projectId: process.env.GOOGLE_CLOUD_PROJECT
 });
 
 getAuth()

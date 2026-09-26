@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
-import { collection, collectionGroup, query, where, getDocs, getCountFromServer } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { collection, doc, getDoc, query, where, getDocs, getCountFromServer } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import Navbar from '../components/Navbar';
 import { REQUEST_STATUS } from '../utils/constants';
+import { FaArrowLeft } from 'react-icons/fa';
 import './AdminMetrics.css';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -13,7 +15,7 @@ const firstDayOfMonthStr = () => {
   return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
 };
 
-// createdAt/updatedAt se guardan como ISO en UTC, y timestamp de mensajes como epoch ms.
+// createdAt/updatedAt se guardan como ISO en UTC, y lastMessageAt como epoch ms.
 // El rango elegido es en horario local, así que armamos los límites en ambos formatos.
 const getRangeBounds = (startDate, endDate) => {
   const start = new Date(`${startDate}T00:00:00`);
@@ -27,11 +29,13 @@ const getRangeBounds = (startDate, endDate) => {
 };
 
 const AdminMetrics = () => {
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState(firstDayOfMonthStr());
   const [endDate, setEndDate] = useState(todayStr());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [metrics, setMetrics] = useState(null);
+  const [fromCache, setFromCache] = useState(false);
 
   const runReport = async () => {
     if (!startDate || !endDate || startDate > endDate) {
@@ -41,11 +45,8 @@ const AdminMetrics = () => {
 
     setLoading(true);
     setError('');
+    setFromCache(false);
 
-    const { startISO, endISO, startMs, endMs } = getRangeBounds(startDate, endDate);
-
-    // Cada consulta se ejecuta por separado y logueada con su propia etiqueta,
-    // para poder identificar en la consola cuál falla (permiso o índice faltante).
     const runStep = async (label, fn) => {
       try {
         return await fn();
@@ -56,6 +57,20 @@ const AdminMetrics = () => {
     };
 
     try {
+      // Reportes de fechas pasadas al deploy de este dashboard se precalculan aparte
+      // (scripts/historicalReport.cjs) porque requieren leer mensajes con el Admin SDK.
+      const cachedSnap = await runStep('reporte precalculado', () =>
+        getDoc(doc(db, 'adminReports', `${startDate}_${endDate}`))
+      );
+
+      if (cachedSnap.exists()) {
+        setMetrics(cachedSnap.data());
+        setFromCache(true);
+        return;
+      }
+
+      const { startISO, endISO, startMs, endMs } = getRangeBounds(startDate, endDate);
+
       const usersSnap = await runStep('usuarios registrados', () =>
         getDocs(
           query(
@@ -76,7 +91,8 @@ const AdminMetrics = () => {
 
       const topVerticals = Object.entries(verticalCounts)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
+        .slice(0, 5)
+        .map(([vertical, count]) => ({ vertical, count }));
 
       const matchesSentSnap = await runStep('match enviados', () =>
         getCountFromServer(
@@ -99,27 +115,22 @@ const AdminMetrics = () => {
         )
       );
 
-      // Una conversación cuenta como "abierta" si tuvo al menos un mensaje dentro del rango.
-      const messagesSnap = await runStep('conversaciones abiertas', () =>
-        getDocs(
+      // Una conversación cuenta como "abierta" si el último mensaje enviado cae dentro del rango.
+      const openConversationsSnap = await runStep('conversaciones abiertas', () =>
+        getCountFromServer(
           query(
-            collectionGroup(db, 'messages'),
-            where('timestamp', '>=', startMs),
-            where('timestamp', '<=', endMs)
+            collection(db, 'chats'),
+            where('lastMessageAt', '>=', startMs),
+            where('lastMessageAt', '<=', endMs)
           )
         )
       );
-
-      const activeChatIds = new Set();
-      messagesSnap.forEach((docSnap) => {
-        activeChatIds.add(docSnap.ref.parent.parent.id);
-      });
 
       setMetrics({
         totalUsers: usersSnap.size,
         matchesSent: matchesSentSnap.data().count,
         matchesAccepted: matchesAcceptedSnap.data().count,
-        openConversations: activeChatIds.size,
+        openConversations: openConversationsSnap.data().count,
         topVerticals
       });
     } catch (err) {
@@ -134,6 +145,18 @@ const AdminMetrics = () => {
     <>
       <Navbar />
       <Container fluid className="admin-metrics-container">
+        <Row className="mb-3">
+          <Col>
+            <Button
+              variant="link"
+              onClick={() => navigate('/dashboard')}
+              className="p-0 text-dark"
+            >
+              <FaArrowLeft size={20} />
+            </Button>
+          </Col>
+        </Row>
+
         <Row className="mb-4">
           <Col>
             <h2 className="dashboard-title">Métricas de uso</h2>
@@ -173,6 +196,12 @@ const AdminMetrics = () => {
 
         {metrics && (
           <>
+            {fromCache && (
+              <Alert variant="info">
+                Reporte precalculado para este rango exacto de fechas (generado con el script de histórico).
+              </Alert>
+            )}
+
             <Row className="g-3 mb-4">
               <Col xs={6} md={3}>
                 <Card className="metric-card">
@@ -222,7 +251,7 @@ const AdminMetrics = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {metrics.topVerticals.map(([vertical, count]) => (
+                      {metrics.topVerticals.map(({ vertical, count }) => (
                         <tr key={vertical}>
                           <td>{vertical}</td>
                           <td>{count}</td>
