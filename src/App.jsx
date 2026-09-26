@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 
 // Pages
 import Landing from './pages/Landing';
@@ -14,6 +15,7 @@ import Dashboard from './pages/Dashboard';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
+import AdminMetrics from './pages/AdminMetrics';
 
 // Components
 import Footer from './components/Footer';
@@ -70,13 +72,21 @@ function App() {
               </PrivateRoute>
             } 
           />
-          <Route 
-            path="/editar-perfil" 
+          <Route
+            path="/editar-perfil"
             element={
               <PrivateRoute>
                 <EditProfile />
               </PrivateRoute>
-            } 
+            }
+          />
+          <Route
+            path="/admin/metricas"
+            element={
+              <AdminRoute>
+                <AdminMetrics />
+              </AdminRoute>
+            }
           />
 
           {/* Ruta por defecto */}

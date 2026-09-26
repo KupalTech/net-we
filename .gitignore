@@ -32,3 +32,6 @@ firebase-debug.log
 .env
 .env.local
 .env.production
+
+# Credenciales de Firebase Admin SDK (scripts de mantenimiento)
+serviceAccountKey.json

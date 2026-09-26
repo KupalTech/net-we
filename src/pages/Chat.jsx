@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   doc,
   getDoc,
+  updateDoc,
   collection,
   query,
   orderBy,
@@ -130,6 +131,10 @@ const Chat = () => {
         senderName: `${userProfile.nombre} ${userProfile.apellido}`,
         timestamp: Date.now(),
         read: false
+      });
+
+      await updateDoc(doc(db, 'chats', chatId), {
+        lastMessageAt: Date.now()
       });
 
       setNewMessage('');

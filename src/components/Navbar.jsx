@@ -7,7 +7,7 @@ import './Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { userProfile, logout } = useAuth();
+  const { userProfile, logout, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -54,6 +54,11 @@ const Navbar = () => {
               <Dropdown.Item onClick={handleProfile}>
                 Ver Perfil
               </Dropdown.Item>
+              {isAdmin && (
+                <Dropdown.Item onClick={() => navigate('/admin/metricas')}>
+                  Métricas
+                </Dropdown.Item>
+              )}
               <Dropdown.Divider />
               <Dropdown.Item onClick={handleLogout}>
                 Cerrar Sesión

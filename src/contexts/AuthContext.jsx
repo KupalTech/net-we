@@ -205,6 +205,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     userProfile,
     emailVerified,
+    isAdmin: userProfile?.is_admin === 'S',
     signup,
     login,
     logout,
