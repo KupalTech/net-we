@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
-import { collection, query, where, getDocs, getCountFromServer } from 'firebase/firestore';
+import { collection, collectionGroup, query, where, getDocs, getCountFromServer } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import Navbar from '../components/Navbar';
 import { REQUEST_STATUS } from '../utils/constants';
@@ -99,22 +99,27 @@ const AdminMetrics = () => {
         )
       );
 
-      // Una conversación cuenta como "abierta" si el último mensaje enviado cae dentro del rango.
-      const openConversationsSnap = await runStep('conversaciones abiertas', () =>
-        getCountFromServer(
+      // Una conversación cuenta como "abierta" si tuvo al menos un mensaje dentro del rango.
+      const messagesSnap = await runStep('conversaciones abiertas', () =>
+        getDocs(
           query(
-            collection(db, 'chats'),
-            where('lastMessageAt', '>=', startMs),
-            where('lastMessageAt', '<=', endMs)
+            collectionGroup(db, 'messages'),
+            where('timestamp', '>=', startMs),
+            where('timestamp', '<=', endMs)
           )
         )
       );
+
+      const activeChatIds = new Set();
+      messagesSnap.forEach((docSnap) => {
+        activeChatIds.add(docSnap.ref.parent.parent.id);
+      });
 
       setMetrics({
         totalUsers: usersSnap.size,
         matchesSent: matchesSentSnap.data().count,
         matchesAccepted: matchesAcceptedSnap.data().count,
-        openConversations: openConversationsSnap.data().count,
+        openConversations: activeChatIds.size,
         topVerticals
       });
     } catch (err) {

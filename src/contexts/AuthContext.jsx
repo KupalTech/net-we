@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Registro de usuario
@@ -185,8 +186,14 @@ export const AuthProvider = ({ children }) => {
       setEmailVerified(user?.emailVerified || false);
       if (user) {
         await loadUserProfile(user.uid);
+        // is_admin vive como custom claim del token, no en el doc de Firestore: las reglas
+        // de collectionGroup (usadas en el reporte de mensajes) no pueden depender de un
+        // get() a otro documento, así que el admin se marca en el token en vez de en el perfil.
+        const tokenResult = await user.getIdTokenResult();
+        setIsAdmin(tokenResult.claims.admin === true);
       } else {
         setUserProfile(null);
+        setIsAdmin(false);
       }
       setLoading(false);
     });
@@ -205,7 +212,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     userProfile,
     emailVerified,
-    isAdmin: userProfile?.is_admin === 'S',
+    isAdmin,
     signup,
     login,
     logout,
